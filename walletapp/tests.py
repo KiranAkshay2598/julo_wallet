@@ -1,8 +1,4 @@
-import json
-from sre_constants import SUCCESS
 from django.contrib.auth.models import User
-from django.http import response
-from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 from rest_framework import status

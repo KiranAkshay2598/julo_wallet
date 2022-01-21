@@ -1,16 +1,16 @@
 from django.contrib.auth.models import User
-from django.core.exceptions import TooManyFieldsSent
 from walletapp.serializers import *
 from walletapp.models import *
-from walletapp import views
 from rest_framework.authtoken.models import Token
 from django.db import transaction
+
 
 def build_response(status, data):
     response = {
         'status': status,
         'data': data}
     return response
+
 
 def initialise_wallet(data):
     try:
@@ -26,12 +26,9 @@ def initialise_wallet(data):
         response = build_response(status='success', data=return_data)
         return response
     except Exception as exc:
-        return_data = {
-            "error": str(exc)
-            }
+        return_data = {"error": str(exc)}
         response = build_response(status='failure', data=return_data)
         return response
-
 
 def view_wallet(user, only_view=False):
     try:
@@ -81,7 +78,9 @@ def transcation_wallet(user,amount,transaction_type):
                 else:
                     wallet.balance = wallet.balance - int(amount)
                 wallet.save() 
-                trx = Transcation.objects.create(transaction_type=transaction_type, transaction_by=wallet.account, amount = amount)
+                trx = Transcation.objects.create(
+                    transaction_type=transaction_type,
+                    transaction_by=wallet.account, amount = amount)
             wallet_serializer = serializer_class(wallet, context={'trx_type': transaction_type})
             return_data = {
                 "deposit" : wallet_serializer.data
@@ -95,9 +94,7 @@ def transcation_wallet(user,amount,transaction_type):
         response = build_response(status, return_data)
         return response
     except Exception as exc:
-        return_data = {
-            "error:" : str(exc)
-            }
+        return_data = {"error:" : str(exc)}
         response = build_response('failure', return_data)
         return response
 
@@ -116,14 +113,10 @@ def disable_wallet(user):
         else:
             status = 'failure'
             return_data = {
-                "error:" : "The wallet is already disabled"
-            }
+                "error:" : "The wallet is already disabled"}
         response = build_response(status, return_data)
         return response
     except Exception as exc:
-        return_data = {
-            "errors:" : str(exc)
-        }
+        return_data = {"errors:" : str(exc)}
         response = build_response('failure', return_data)
         return response
-

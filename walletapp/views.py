@@ -1,7 +1,4 @@
-from django.db.models.fields import reverse_related
-from django.shortcuts import render
 from rest_framework.views import APIView
-from walletapp import serializers
 from walletapp.services import *
 from walletapp.serializers import *
 from rest_framework.response import Response
@@ -48,8 +45,6 @@ class WalletView(APIView):
             status = 400
         return Response(response, status=status)
     
-
-
 
 class DepositToWallet(APIView):
     def post(self, request):
