@@ -1,22 +1,23 @@
 from rest_framework.views import APIView
-from walletapp.services import *
-from walletapp.serializers import *
+from walletapp.services import (
+    initialise_wallet, view_wallet, disable_wallet, transaction_wallet)
+from walletapp.serializers import InitSerializer
 from rest_framework.response import Response
 
+
 class InitialiseWallet(APIView):
-    serializer_class = InitSerializer
 
     def post(self, request):
         serializer = InitSerializer(data=request.POST)
         if serializer.is_valid():
             response = initialise_wallet(serializer.validated_data)
             if response['status'] == "success":
-                status=201
+                status = 201
             else:
-                status=400
+                status = 400
             return Response(response, status=status)
         else:
-            return Response(serializer.errors,status=400)
+            return Response(serializer.errors, status=400)
 
 
 class WalletView(APIView):
@@ -44,7 +45,7 @@ class WalletView(APIView):
         else:
             status = 400
         return Response(response, status=status)
-    
+
 
 class DepositToWallet(APIView):
     def post(self, request):
@@ -52,7 +53,7 @@ class DepositToWallet(APIView):
         amount = request.POST.get('amount')
         if not amount:
             return Response("Ammount is a required field", status=400)
-        response = transcation_wallet(user, amount, 'deposit')
+        response = transaction_wallet(user, amount, 'deposit')
         if response['status'] == 'success':
             status = 200
         else:
@@ -66,13 +67,9 @@ class WithdrawalFromWallet(APIView):
         amount = request.POST.get('amount')
         if not amount:
             return Response("Amount is a required field", status=400)
-        response = transcation_wallet(user, amount, 'withdraw')
+        response = transaction_wallet(user, amount, 'withdraw')
         if response['status'] == 'success':
             status = 200
         else:
             status = 400
         return Response(response, status=status)
-
-
-
-    

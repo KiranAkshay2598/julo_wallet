@@ -1,6 +1,9 @@
 from django.contrib.auth.models import User
-from walletapp.serializers import *
-from walletapp.models import *
+from walletapp.serializers import (
+    WalletDisableSerializer,
+    WalletTransactionSerializer,
+    WalletResponseSerializer)
+from walletapp.models import Wallet, Account, Transcation
 from rest_framework.authtoken.models import Token
 from django.db import transaction
 
@@ -29,6 +32,7 @@ def initialise_wallet(data):
         return_data = {"error": str(exc)}
         response = build_response(status='failure', data=return_data)
         return response
+
 
 def view_wallet(user, only_view=False):
     try:
@@ -67,7 +71,7 @@ def view_wallet(user, only_view=False):
         return response
 
 
-def transcation_wallet(user,amount,transaction_type):
+def transaction_wallet(user, amount, transaction_type):
     try:
         wallet = user.account.wallet
         if wallet.status:
@@ -77,24 +81,24 @@ def transcation_wallet(user,amount,transaction_type):
                     wallet.balance = wallet.balance + int(amount)
                 else:
                     wallet.balance = wallet.balance - int(amount)
-                wallet.save() 
-                trx = Transcation.objects.create(
+                wallet.save()
+                Transcation.objects.create(
                     transaction_type=transaction_type,
-                    transaction_by=wallet.account, amount = amount)
+                    transaction_by=wallet.account, amount=amount)
             wallet_serializer = serializer_class(wallet, context={'trx_type': transaction_type})
             return_data = {
-                "deposit" : wallet_serializer.data
+                "deposit": wallet_serializer.data
             }
             status = "success"
         else:
             return_data = {
-                "error:" : 'Wallet is not enabled, please enable the wallet 1st to proceed further'
+                "error": 'Wallet is not enabled, please enable the wallet 1st to proceed further'
             }
             status = "failure"
         response = build_response(status, return_data)
         return response
     except Exception as exc:
-        return_data = {"error:" : str(exc)}
+        return_data = {"error": str(exc)}
         response = build_response('failure', return_data)
         return response
 
@@ -108,15 +112,15 @@ def disable_wallet(user):
             serializer_wallet = WalletDisableSerializer(wallet)
             status = 'success'
             return_data = {
-                "wallet:" : serializer_wallet.data
+                "wallet:": serializer_wallet.data
             }
         else:
             status = 'failure'
             return_data = {
-                "error:" : "The wallet is already disabled"}
+                "error": "The wallet is already disabled"}
         response = build_response(status, return_data)
         return response
     except Exception as exc:
-        return_data = {"errors:" : str(exc)}
+        return_data = {"errors:": str(exc)}
         response = build_response('failure', return_data)
         return response

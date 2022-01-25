@@ -1,9 +1,9 @@
 from rest_framework import serializers
-from walletapp.models import *
+from walletapp.models import Wallet, Transcation
 from datetime import datetime
 
 
-class InitSerializer(serializers.Serializer):   
+class InitSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
     fullname = serializers.CharField()
@@ -11,7 +11,7 @@ class InitSerializer(serializers.Serializer):
 
 class WalletResponseSerializer(serializers.ModelSerializer):
     id = serializers.CharField()
-    owned_by = serializers.CharField(source='account_id')    
+    owned_by = serializers.CharField(source='account_id')
     status = serializers.SerializerMethodField()
     enabled_at = serializers.SerializerMethodField()
 
@@ -20,7 +20,7 @@ class WalletResponseSerializer(serializers.ModelSerializer):
             return 'enabled'
         else:
             return 'disabled'
-    
+
     def get_enabled_at(self, instance):
         now = datetime.now()
         return str(now)
@@ -31,8 +31,8 @@ class WalletResponseSerializer(serializers.ModelSerializer):
 
 
 class WalletDisableSerializer(serializers.ModelSerializer):
-    id= serializers.CharField()
-    owned_by = serializers.CharField(source='account_id')    
+    id = serializers.CharField()
+    owned_by = serializers.CharField(source='account_id')
     status = serializers.SerializerMethodField()
     disabled_at = serializers.SerializerMethodField()
 
@@ -41,7 +41,7 @@ class WalletDisableSerializer(serializers.ModelSerializer):
             return 'enabled'
         else:
             return 'disabled'
-        
+
     def get_disabled_at(self, instance):
         now = datetime.now()
         return str(now)
@@ -56,17 +56,19 @@ class WalletTransactionSerializer(serializers.ModelSerializer):
     transaction_by = serializers.CharField(source='account_id')
     transaction_at = serializers.SerializerMethodField()
     amount = serializers.SerializerMethodField()
-   
+
     def get_transaction_at(self, instance):
         now = datetime.now()
         return str(now)
-    
+
     def get_amount(self, instance):
-        last_trx = Transcation.objects.filter(transaction_by=instance.account).last()
+        last_trx = Transcation.objects.filter(
+            transaction_by=instance.account).last()
         return str(last_trx.amount)
-    
+
     def to_representation(self, instance):
-        data = super(WalletTransactionSerializer, self).to_representation(instance)
+        data = super(WalletTransactionSerializer, self). \
+            to_representation(instance)
         data['status'] = 'success'
         if self.context['trx_type'] == 'deposit':
             data['deposited_by'] = data['transaction_by']
