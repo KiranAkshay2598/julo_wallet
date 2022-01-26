@@ -1,6 +1,6 @@
+from walletapp.tasks import update_wallet_balance
 from django.contrib.auth.models import User
 from walletapp.serializers import (
-    WalletDisableSerializer,
     WalletTransactionSerializer,
     WalletResponseSerializer)
 from walletapp.models import Wallet, Account, Transcation
@@ -17,14 +17,18 @@ def build_response(status, data):
 
 def initialise_wallet(data):
     try:
-        username = data.get('username')
-        password = data.get('password')
-        fullname = data.get('fullname')
+        customer_xid = data.get('customer_xid')
         with transaction.atomic():
-            user = User.objects.create_user(username=username, password=password)
+            existing_account = Account.objects.filter(customer_xid=customer_xid).last()
+            if existing_account:
+                user = existing_account.user
+                if not existing_account.wallet:
+                    Wallet.objects.create(account=existing_account)
+            else:
+                user = User.objects.create_user(username=customer_xid)
+                account = Account.objects.create(customer_xid=customer_xid, user=user)
+                Wallet.objects.create(account=account)
             token, created = Token.objects.get_or_create(user=user)
-            account = Account.objects.create(full_name=fullname, user=user)
-            Wallet.objects.create(account=account, balance=0)
         return_data = {"token": token.key}
         response = build_response(status='success', data=return_data)
         return response
@@ -57,7 +61,7 @@ def view_wallet(user, only_view=False):
             status = 'failure'
         else:
             return_data = {
-                "error": "Wallet is not enabled, please enable the wallet 1st to proceed further"
+                "error": "Wallet is not enabled, please enable the wallet first to proceed further"
             }
             status = 'failure'
 
@@ -71,28 +75,27 @@ def view_wallet(user, only_view=False):
         return response
 
 
-def transaction_wallet(user, amount, transaction_type):
+def transaction_wallet(data, user, transaction_type):
     try:
         wallet = user.account.wallet
         if wallet.status:
             with transaction.atomic():
                 serializer_class = WalletTransactionSerializer
-                if transaction_type == 'deposit':
-                    wallet.balance = wallet.balance + int(amount)
-                else:
-                    wallet.balance = wallet.balance - int(amount)
-                wallet.save()
-                Transcation.objects.create(
+                amount = data.get('amount')
+                reference_id = data.get('reference_id')
+                update_wallet_balance.apply_async((int(amount), transaction_type, wallet.id), countdown=5)
+                trx = Transcation.objects.create(
                     transaction_type=transaction_type,
-                    transaction_by=wallet.account, amount=amount)
-            wallet_serializer = serializer_class(wallet, context={'trx_type': transaction_type})
+                    transaction_by=wallet.account, amount=amount,
+                    reference_id=reference_id)
+            wallet_serializer = serializer_class(wallet, context={'trx': trx})
             return_data = {
-                "deposit": wallet_serializer.data
+                transaction_type: wallet_serializer.data
             }
             status = "success"
         else:
             return_data = {
-                "error": 'Wallet is not enabled, please enable the wallet 1st to proceed further'
+                "error": 'Wallet is not enabled, please enable the wallet first to proceed further'
             }
             status = "failure"
         response = build_response(status, return_data)
@@ -109,7 +112,7 @@ def disable_wallet(user):
         if wallet.status:
             wallet.status = False
             wallet.save()
-            serializer_wallet = WalletDisableSerializer(wallet)
+            serializer_wallet = WalletResponseSerializer(wallet, context={'disabled':True})
             status = 'success'
             return_data = {
                 "wallet:": serializer_wallet.data
