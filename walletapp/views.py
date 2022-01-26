@@ -1,7 +1,9 @@
 from rest_framework.views import APIView
 from walletapp.services import (
-    initialise_wallet, view_wallet, disable_wallet, transaction_wallet)
-from walletapp.serializers import InitSerializer
+    initialise_wallet, view_wallet, disable_wallet)
+from walletapp.services import transaction_wallet
+from walletapp.serializers import (
+    InitSerializer, TransactionRequestSerializer, DisableWalletRequestSerializer)
 from rest_framework.response import Response
 
 
@@ -38,38 +40,50 @@ class WalletView(APIView):
         return Response(response, status=status)
 
     def patch(self, request):
-        user = request.user
-        response = disable_wallet(user)
-        if response['status'] == 'success':
-            status = 200
+        serializer = DisableWalletRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            user = request.user
+            response = disable_wallet(user)
+            if response['status'] == 'success':
+                status = 200
+            else:
+                status = 400
         else:
-            status = 400
+            response, status = serializer.errors, 400
         return Response(response, status=status)
 
 
 class DepositToWallet(APIView):
     def post(self, request):
-        user = request.user
-        amount = request.POST.get('amount')
-        if not amount:
-            return Response("Ammount is a required field", status=400)
-        response = transaction_wallet(user, amount, 'deposit')
-        if response['status'] == 'success':
-            status = 200
+        transaction_type = 'deposit'
+        account = request.user.account
+        serializer = TransactionRequestSerializer(
+            data=request.POST, context={'trx_type': transaction_type, 'account': account})
+        if serializer.is_valid():
+            user = request.user
+            response = transaction_wallet(serializer.validated_data, user, transaction_type)
+            if response['status'] == 'success':
+                status = 201
+            else:
+                status = 400
         else:
-            status = 400
+            response, status = serializer.errors, 400
         return Response(response, status=status)
 
 
 class WithdrawalFromWallet(APIView):
     def post(self, request):
-        user = request.user
-        amount = request.POST.get('amount')
-        if not amount:
-            return Response("Amount is a required field", status=400)
-        response = transaction_wallet(user, amount, 'withdraw')
-        if response['status'] == 'success':
-            status = 200
+        transaction_type = 'withdrawl'
+        account = request.user.account
+        serializer = TransactionRequestSerializer(
+            data=request.POST, context={'trx_type': transaction_type, 'account': account})
+        if serializer.is_valid():
+            user = request.user
+            response = transaction_wallet(serializer.validated_data, user, transaction_type)
+            if response['status'] == 'success':
+                status = 201
+            else:
+                status = 400
         else:
-            status = 400
+            response, status = serializer.errors, 400
         return Response(response, status=status)
