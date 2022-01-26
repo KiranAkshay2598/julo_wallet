@@ -83,7 +83,7 @@ def transaction_wallet(data, user, transaction_type):
                 serializer_class = WalletTransactionSerializer
                 amount = data.get('amount')
                 reference_id = data.get('reference_id')
-                update_wallet_balance.apply_async((int(amount), transaction_type, wallet.id), countdown=10)
+                update_wallet_balance.apply_async((int(amount), transaction_type, wallet.id), countdown=5)
                 trx = Transcation.objects.create(
                     transaction_type=transaction_type,
                     transaction_by=wallet.account, amount=amount,
