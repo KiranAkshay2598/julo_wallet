@@ -75,8 +75,7 @@ class WalletTransactionSerializer(serializers.ModelSerializer):
         return str(now)
 
     def get_amount(self, instance):
-        last_trx = Transcation.objects.filter(
-            transaction_by=instance.account).last()
+        last_trx = self.context.get('trx')
         return str(last_trx.amount)
     
     def get_reference_id(self, instance):
