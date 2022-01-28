@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from walletapp.models import Wallet, Transcation
+from walletapp.models import Wallet, Transaction
 from datetime import datetime
 
 
@@ -12,13 +12,13 @@ class TransactionRequestSerializer(serializers.ModelSerializer):
     def validate_reference_id(self, value):
         trx_type = self.context.get('trx_type')
         account = self.context.get('account')
-        if Transcation.objects.filter(reference_id=value, transaction_type=trx_type, transaction_by=account).exists():
+        if Transaction.objects.filter(reference_id=value, transaction_type=trx_type, transaction_by=account).exists():
             raise serializers.ValidationError("'reference_id': '{}' for trx '{}' is already used".format(value, trx_type))
         else:
             return value
 
     class Meta:
-        model = Transcation
+        model = Transaction
         fields = ('amount', 'reference_id')
 
 class DisableWalletRequestSerializer(serializers.Serializer):

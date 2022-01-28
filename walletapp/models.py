@@ -13,7 +13,7 @@ class Wallet(models.Model):
     status = models.BooleanField(default=False)
 
 
-class Transcation(models.Model):
+class Transaction(models.Model):
     TRANSACTION_CHOICES = (
         ('Deposit', 'deposit'),
         ('Withdraw', 'withdraw')

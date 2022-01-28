@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from walletapp.serializers import (
     WalletTransactionSerializer,
     WalletResponseSerializer)
-from walletapp.models import Wallet, Account, Transcation
+from walletapp.models import Wallet, Account, Transaction
 from rest_framework.authtoken.models import Token
 from django.db import transaction
 
@@ -83,8 +83,12 @@ def transaction_wallet(data, user, transaction_type):
                 serializer_class = WalletTransactionSerializer
                 amount = data.get('amount')
                 reference_id = data.get('reference_id')
-                update_wallet_balance.apply_async((int(amount), transaction_type, wallet.id), countdown=5)
-                trx = Transcation.objects.create(
+                if transaction_type == 'withdrawl' and amount > wallet.balance:
+                    return_data = {
+                        "error": "Insufficient balance for the requested amount"}
+                    return build_response('failure', return_data)
+                update_wallet_balance(amount, transaction_type, wallet.id)
+                trx = Transaction.objects.create(
                     transaction_type=transaction_type,
                     transaction_by=wallet.account, amount=amount,
                     reference_id=reference_id)

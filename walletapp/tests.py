@@ -72,6 +72,8 @@ class WalletTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_withdrawl(self):
+        self.wallet.balance = 1000
+        self.wallet.save()
         data = {"amount": 300, 'reference_id':'test_ref_id_1'}
         response = self.client.post("/api/v1/wallet/withdrawals", data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
