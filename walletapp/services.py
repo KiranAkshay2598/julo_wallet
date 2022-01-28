@@ -87,7 +87,7 @@ def transaction_wallet(data, user, transaction_type):
                     return_data = {
                         "error": "Insufficient balance for the requested amount"}
                     return build_response('failure', return_data)
-                update_wallet_balance(amount, transaction_type, wallet.id)
+                update_wallet_balance.delay(amount, transaction_type, wallet.id)
                 trx = Transaction.objects.create(
                     transaction_type=transaction_type,
                     transaction_by=wallet.account, amount=amount,
