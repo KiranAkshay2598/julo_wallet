@@ -1,0 +1,22 @@
+# Python caches and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Databases
+db.sqlite3
+
+# Environments
+.venv/
+venv/
+ENV/
+
+# IDE configurations
+.vscode/
+!.vscode/launch.json
+pyrefly.toml
+pyrightconfig.json
+
+# Logs
+*.log
+celerybeat-schedule

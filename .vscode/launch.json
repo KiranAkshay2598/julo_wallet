@@ -10,11 +10,30 @@
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
             "args": [
-                "runserver"
+                "runserver",
+                "0.0.0.0:8000"
             ],
             "django": true,
-            "python": "/home/krishna/kiran/kenv/bin/python3.6"
-
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: Celery Worker",
+            "type": "python",
+            "request": "launch",
+            "module": "celery",
+            "args": [
+                "-A",
+                "miniwallet",
+                "worker",
+                "-l",
+                "info",
+                "-P",
+                "solo"
+            ],
+            "django": true,
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "console": "integratedTerminal"
         }
     ]
 }

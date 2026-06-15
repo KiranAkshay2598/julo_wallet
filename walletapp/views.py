@@ -1,4 +1,5 @@
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from walletapp.services import (
     initialise_wallet, view_wallet, disable_wallet)
 from walletapp.services import transaction_wallet
@@ -23,6 +24,8 @@ class InitialiseWallet(APIView):
 
 
 class WalletView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         response = view_wallet(user=request.user, only_view=True)
         if response['status'] == 'success':
@@ -54,6 +57,8 @@ class WalletView(APIView):
 
 
 class DepositToWallet(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         transaction_type = 'deposit'
         account = request.user.account
@@ -72,6 +77,8 @@ class DepositToWallet(APIView):
 
 
 class WithdrawalFromWallet(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         transaction_type = 'withdrawl'
         account = request.user.account

@@ -6,7 +6,6 @@ from datetime import datetime
 class InitSerializer(serializers.Serializer):
     customer_xid = serializers.CharField()
 
-
 class TransactionRequestSerializer(serializers.ModelSerializer):
 
     def validate_reference_id(self, value):
@@ -76,23 +75,24 @@ class WalletTransactionSerializer(serializers.ModelSerializer):
 
     def get_amount(self, instance):
         last_trx = self.context.get('trx')
-        return str(last_trx.amount)
+        return str(last_trx.amount) if last_trx else ""
     
     def get_reference_id(self, instance):
         last_trx = self.context.get('trx')
-        return last_trx.reference_id
+        return last_trx.reference_id if last_trx else ""
 
     def to_representation(self, instance):
         data = super(WalletTransactionSerializer, self). \
             to_representation(instance)
         data['status'] = 'success'
         last_trx = self.context.get('trx')
-        if last_trx.transaction_type == 'deposit':
-            data['deposited_by'] = data['transaction_by']
-            data['deposited_at'] = data['transaction_at']
-        elif last_trx.transaction_type == 'withdrawl':
-            data['withdrawn_by'] = data['transaction_by']
-            data['withdrawn_at'] = data['transaction_at']
+        if last_trx:
+            if last_trx.transaction_type == 'deposit':
+                data['deposited_by'] = data['transaction_by']
+                data['deposited_at'] = data['transaction_at']
+            elif last_trx.transaction_type == 'withdrawl':
+                data['withdrawn_by'] = data['transaction_by']
+                data['withdrawn_at'] = data['transaction_at']
         data.pop('transaction_by')
         data.pop('transaction_at')
         return data
