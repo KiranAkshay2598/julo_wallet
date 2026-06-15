@@ -1,6 +1,6 @@
 # Julo Wallet API
 
-A robust, fully-grounded backend transaction system built with Django and Python. This project was originally developed back in 2022 as part of an interview process to showcase clean software engineering practices, strict coding standards, and correct transaction flow design.
+A robust, fully-grounded backend transaction system built with Django and Python. This project was originally developed back in 2022 as part of an interview process to showcase clean software engineering practices, strict coding standards, and correct transaction flow design. Rather than a sprawling enterprise application, it is designed as a focused, core reference project to demonstrate strong backend fundamentals in transaction handling and state management.
 
 It serves as a reference backend project for core financial and banking logic, featuring token-based authentication and strict database-level ACID transaction integrity. It is an excellent resource for learning core backend API design and asynchronous worker architectures.
 
@@ -11,7 +11,7 @@ It serves as a reference backend project for core financial and banking logic, f
 *   **Account Initialization**: Create user accounts and authenticate using Token Authentication.
 *   **Wallet Management**: Enable, disable, and view wallet details.
 *   **ACID Compliance**: Ensures strict database integrity during financial operations (deposits and withdrawals).
-*   **Asynchronous Processing**: Offloads heavy wallet balance calculations to background worker tasks using Celery and RabbitMQ.
+*   **Asynchronous Processing**: Offloads wallet balance updates to background worker tasks using Celery and RabbitMQ.
 *   **Unit Tested**: Includes comprehensive unit tests verifying success and failure transaction states.
 
 ---
